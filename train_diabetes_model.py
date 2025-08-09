@@ -1,0 +1,21 @@
+import pandas as pd 
+import tensorflow as tf
+from sklearn.model_selection import train_test_split 
+from sklearn.preprocessing import StandardScaler 
+import joblib 
+df=pd.read_csv("diabetes.csv")
+x=df.drop('Outcome',axis=1) 
+y=df['Outcome']
+scalar=StandardScaler()
+x_scaled=scalar.fit_transform(x)
+joblib.dump(scalar,"diabetes_scaler.pkl")
+#train model
+x_train,x_test,y_train,y_test=train_test_split(x_scaled,y,test_size=0.2)
+model=tf.keras.Sequential([
+    tf.keras.layers.Dense(32,activation='relu',input_shape=(x.shape[1],)),
+    tf.keras.layers.Dense(16,activation='relu'),
+    tf.keras.layers.Dense(1,activation='sigmoid')
+])
+model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['accuracy'])
+model.fit(x_train,y_train,epochs=25,batch_size=16)
+model.save("diabetes_model.h5")
